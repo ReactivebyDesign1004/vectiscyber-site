@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Check Your AI's Work</title>
+<meta name="description" content="Independent, claim-by-claim checks of the AI work small businesses rely on. Free pilot for three businesses.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one left-aligned reading column; the hero pairs the promise with a real claim ledger, the way a reviewer's working sheet looks. */
+:root {
+  --paper: #f5f7f6;
+  --sheet: #ffffff;
+  --ink: #14202b;
+  --muted: #55636e;
+  --rule: #d5dcdf;
+  --accent: #1d5c7a;
+  --ok: #2f7a4f;
+  --warn: #9a6408;
+  --bad: #b23a2e;
+  --tint-ok: #e5f1ea;
+  --tint-warn: #f8eedb;
+  --tint-bad: #f7e3e0;
+  --display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f161c; --sheet: #16202a; --ink: #e6ecef; --muted: #9aa8b2; --rule: #2a3742;
+    --accent: #6fb3d6; --ok: #6cc08f; --warn: #e2b057; --bad: #f08a7e;
+    --tint-ok: #173326; --tint-warn: #3a2d12; --tint-bad: #3b1d1a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0f161c; --sheet: #16202a; --ink: #e6ecef; --muted: #9aa8b2; --rule: #2a3742;
+  --accent: #6fb3d6; --ok: #6cc08f; --warn: #e2b057; --bad: #f08a7e;
+  --tint-ok: #173326; --tint-warn: #3a2d12; --tint-bad: #3b1d1a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--paper); color: var(--ink); font: 400 1.0625rem/1.6 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1040px; margin: 0 auto; padding-block: 40px 64px; display: grid; gap: 72px; }
+h1, h2 { font-family: var(--display); font-weight: 800; line-height: 1.08; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2.2rem, 5.2vw, 3.6rem); }
+h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); }
+h3 { font: 600 1.1rem/1.3 var(--display); margin: 0; }
+p { margin: 0; max-width: 64ch; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.eyebrow { font: 500 0.78rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.brand { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.brand b { font: 800 1.05rem/1 var(--display); letter-spacing: 0.01em; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 48px; align-items: start; }
+.hero .lead { display: grid; gap: 20px; }
+.hero .sub { font-size: 1.2rem; color: var(--muted); }
+.offer { display: inline-flex; align-items: center; gap: 10px; font: 600 1rem/1.3 var(--body); padding: 10px 14px; border: 1.5px solid var(--accent); border-radius: 6px; color: var(--ink); width: fit-content; }
+.offer span { font: 500 0.75rem/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+
+/* the claim ledger */
+.ledger { background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.ledger header { padding: 14px 18px; border-bottom: 1px solid var(--rule); display: grid; gap: 4px; }
+.ledger header p { font-size: 0.92rem; color: var(--muted); }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 6px 14px; padding: 14px 18px; border-bottom: 1px solid var(--rule); }
+.row:last-child { border-bottom: 0; }
+.claim { font-size: 0.98rem; min-width: 0; }
+.why { grid-column: 1 / -1; font: 400 0.82rem/1.5 var(--mono); color: var(--muted); }
+.v { font: 500 0.72rem/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 8px; border-radius: 4px; white-space: nowrap; align-self: start; }
+.v.ok { color: var(--ok); background: var(--tint-ok); }
+.v.warn { color: var(--warn); background: var(--tint-warn); }
+.v.bad { color: var(--bad); background: var(--tint-bad); }
+
+/* measured results */
+.section { display: grid; gap: 24px; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 2px solid var(--ink); }
+.fact { padding: 18px 20px 0 0; display: grid; gap: 8px; align-content: start; }
+.fact + .fact { padding-left: 20px; border-left: 1px solid var(--rule); }
+.num { font: 800 2.4rem/1 var(--display); font-variant-numeric: tabular-nums; }
+.num small { font: 500 0.8rem/1 var(--mono); color: var(--muted); letter-spacing: 0.04em; margin-left: 6px; }
+.fact p { font-size: 0.98rem; color: var(--muted); }
+.note { font-size: 0.92rem; color: var(--muted); }
+
+/* steps */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; counter-reset: step; }
+.steps li { display: grid; gap: 8px; align-content: start; padding-top: 14px; border-top: 1px solid var(--rule); }
+.steps .when { font: 500 0.78rem/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.steps p { font-size: 0.98rem; }
+
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; }
+.two > div { display: grid; gap: 12px; align-content: start; min-width: 0; }
+ol.list { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; }
+ol.list li { padding-left: 4px; }
+
+.callout { background: var(--sheet); border: 1px solid var(--rule); border-left: 4px solid var(--warn); border-radius: 6px; padding: 18px 20px; display: grid; gap: 10px; }
+
+.contact { border-top: 2px solid var(--ink); padding-top: 24px; display: grid; gap: 16px; }
+.mail { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.mail code { font: 500 1.15rem/1.2 var(--mono); user-select: all; padding: 10px 12px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; }
+.mail button { font: 600 0.95rem/1 var(--body); padding: 12px 16px; border-radius: 6px; border: 0; background: var(--accent); color: var(--sheet); cursor: pointer; }
+.mail .status { font-size: 0.9rem; color: var(--muted); min-height: 1.2em; }
+.sources { font-size: 0.85rem; color: var(--muted); display: grid; gap: 6px; }
+.sources ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+
+@media (max-width: 860px) {
+  .hero, .two { grid-template-columns: 1fr; gap: 32px; }
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .facts { grid-template-columns: 1fr; }
+  .fact + .fact { padding-left: 0; border-left: 0; border-top: 1px solid var(--rule); }
+  .fact { padding: 16px 0; }
+  .steps { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mail button { transition: filter 0.15s; }
+  .mail button:hover { filter: brightness(1.1); }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <b>Vectis Cyber Assurance</b>
+    <span class="eyebrow">AI output verification for small businesses</span>
+  </div>
+
+  <section class="hero">
+    <div class="lead">
+      <h1>Check your AI's work before it costs you.</h1>
+      <p class="sub">An independent, claim-by-claim check of the AI work your business relies on, against your own documents. You get what was wrong, what it costs you, and a clear call on whether a fix is worth it.</p>
+      <div class="offer"><span>Free pilot</span> 3 spots for small businesses</div>
+    </div>
+
+    <figure class="ledger" aria-label="Example claim check">
+      <header>
+        <span class="eyebrow">From a real check</span>
+        <p>ChatGPT was asked "Is Signifyd safe for my business to use?" with Signifyd's 2026 security report (SOC 3) attached. Its claims, summarized, each checked against the report.</p>
+      </header>
+      <div class="row">
+        <div class="claim">The auditor concluded the controls were suitably designed and operating effectively.</div>
+        <span class="v warn">Overstated</span>
+        <div class="why">Page 6: the opinion holds only if the cloud providers' and the customer's own controls also worked. The condition was dropped.</div>
+      </div>
+      <div class="row">
+        <div class="claim">"Infrastructure security: Good."</div>
+        <span class="v warn">Overstated</span>
+        <div class="why">Pages 13 to 14: the infrastructure runs on cloud providers the audit did not examine.</div>
+      </div>
+      <div class="row">
+        <div class="claim">Covers security, availability, confidentiality and privacy.</div>
+        <span class="v ok">Verified</span>
+        <div class="why">Pages 5 and 14.</div>
+      </div>
+      <div class="row">
+        <div class="claim">Never mentioned: the report leaves out Processing Integrity, whether the vendor's decisions are processed correctly.</div>
+        <span class="v bad">Material gap</span>
+        <div class="why">Pages 2 and 5. For a fraud-decision vendor, that is the core question. ChatGPT rated the vendor green.</div>
+      </div>
+    </figure>
+  </section>
+
+  <section class="section" aria-labelledby="h-tests">
+    <h2 id="h-tests">What our own tests found</h2>
+    <div class="facts">
+      <div class="fact">
+        <div class="num">3 of 11</div>
+        <p>claims overstated when ChatGPT was asked, in plain words, whether a vendor was safe. It also missed the one gap that mattered most.</p>
+      </div>
+      <div class="fact">
+        <div class="num">2 of 10</div>
+        <p>AI-written company profiles carried a finding marked material: one that could change the decision they were written for.</p>
+      </div>
+      <div class="fact">
+        <div class="num">5 of 7</div>
+        <p>real gaps caught by our own check on one vendor report, and 4 of 5 planted errors. We count our misses too, and every report states them.</p>
+      </div>
+    </div>
+    <p class="note">These are small counts from our own records, October 2026. The pilots exist to grow them.</p>
+  </section>
+
+  <section class="section" aria-labelledby="h-why">
+    <h2 id="h-why">Why this matters now</h2>
+    <div class="callout">
+      <h3>Your liability insurance may no longer cover AI mistakes.</h3>
+      <p>Since January 2026, insurers can add standard exclusions to general liability policies for losses that arise from generative AI, which may apply even to AI used through a vendor. By July 31, 2026, insurers had filed 4,078 adoptions of these exclusions, 3,955 of them in lines small businesses commonly buy.<sup><a href="#src">1, 2</a></sup> Ask your broker whether your policy has one.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-how">
+    <h2 id="h-how">How the free pilot works</h2>
+    <ol class="steps">
+      <li><span class="when">Week 1</span><h3>Pick one workflow</h3><p>A short call to choose the AI work that matters most to you, and the documents it should match.</p></li>
+      <li><span class="when">Weeks 2 to 3</span><h3>Check every claim</h3><p>About 30 recent AI outputs, claim by claim against your sources, plus a second independent check and planted test errors.</p></li>
+      <li><span class="when">Week 3</span><h3>Count the cost</h3><p>Your error rates and your cost per mistake go into our calibration bench: risk per item, cost per month, with and without a fix.</p></li>
+      <li><span class="when">Week 4</span><h3>Get the call</h3><p>A written report and a review call: deploy, modify or stop the fix, and the questions to put to your vendor.</p></li>
+    </ol>
+  </section>
+
+  <section class="two">
+    <div>
+      <h2>What you get</h2>
+      <ol class="list">
+        <li>Every wrong, overstated or unsupported claim, with the page or line that shows it.</li>
+        <li>What the AI left out that matters.</li>
+        <li>How often a costly error gets through, and what it costs you per month, each with a range.</li>
+        <li>A deploy, modify or stop call on the fix, with the reason.</li>
+        <li>Every number labeled measured (counted) or modeled (calculated from the counts).</li>
+      </ol>
+    </div>
+    <div>
+      <h2>What we ask</h2>
+      <ol class="list">
+        <li>About 30 recent AI outputs and the documents behind them.</li>
+        <li>Two short calls and a few emails.</li>
+        <li>Your best estimate of what one serious mistake costs you.</li>
+        <li>Permission to use the anonymous counts in our research.</li>
+        <li>Honest feedback on whether the report was worth it.</li>
+      </ol>
+      <p class="note">Your material stays private and is deleted 90 days after the report. You can keep anything sensitive out of AI tools entirely.</p>
+    </div>
+  </section>
+
+  <section class="two">
+    <div>
+      <h2>What this is not</h2>
+      <ol class="list">
+        <li>Not a certification, a SOC 2 audit, or legal, financial or compliance advice.</li>
+        <li>A check of a sample: errors outside it can exist.</li>
+        <li>It checks your AI against your sources; it cannot prove a source is right.</li>
+        <li>Money figures are estimates from your counts, not a promise of savings.</li>
+      </ol>
+    </div>
+    <div>
+      <h2>Protect yourself today</h2>
+      <ol class="list">
+        <li>For any number, date, name or quote you will act on, ask the AI for its source and open it yourself.</li>
+        <li>Check the one or two claims your decision rests on against the original, not against another AI.</li>
+        <li>Watch for dropped conditions: "effective" is not "effective if your own controls work."</li>
+        <li>Ask what was left out, not only whether what was said is right.</li>
+        <li>Log the AI errors you catch and what each cost. It becomes your own error rate.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="contact" aria-labelledby="h-contact">
+    <h2 id="h-contact">Claim a pilot spot</h2>
+    <p>Email a line about your business and the AI work you rely on. Lawrence J. Genobia, Vectis Cyber Assurance.</p>
+    <div class="mail">
+      <code id="email">joshua@vectiscyber.com</code>
+      <button id="copy" type="button">Copy email</button>
+      <span class="status" id="copy-status" aria-live="polite"></span>
+    </div>
+    <div class="sources" id="src">
+      <span class="eyebrow">Sources</span>
+      <ol>
+        <li><a href="https://www.moneygeek.com/insurance/business/general-liability/generative-ai-exclusion/" target="_blank" rel="noopener">MoneyGeek: Your business insurance may have dropped AI coverage in January 2026</a></li>
+        <li><a href="https://www.phcppros.com/articles/24005-new-trades-coverage-data-shows-rapid-adoption-of-ai-exclusions-in-business-liability-insurance" target="_blank" rel="noopener">PHCP Pros: Trades Coverage data on AI exclusions in business liability insurance</a></li>
+      </ol>
+    </div>
+  </section>
+</div>
+
+<script>
+document.getElementById("copy").addEventListener("click", function () {
+  var text = document.getElementById("email").textContent;
+  var status = document.getElementById("copy-status");
+  function selectIt() {
+    var r = document.createRange(); r.selectNodeContents(document.getElementById("email"));
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    status.textContent = "Selected. Press Ctrl+C or Cmd+C to copy.";
+  }
+  try {
+    navigator.clipboard.writeText(text).then(function () { status.textContent = "Copied."; }, selectIt);
+  } catch (e) { selectIt(); }
+});
+</script>
+</body>
+</html>
